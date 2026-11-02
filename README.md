@@ -4,7 +4,17 @@
 
 ## GitHub Pages
 
-このプロジェクトはビルド不要の静的サイトです。GitHub Pages の `Settings → Pages → Build and deployment → Source` で **GitHub Actions** を選択してください。デプロイ設定は `.github/workflows/pages.yml` に用意しています。公開先の候補は https://kaito-ishii159.github.io/door-presentation-builder/ です（デプロイ成功後に有効になります）。
+公開URL: https://kaito-ishii159.github.io/door-presentation-builder/
+
+このプロジェクトはビルド不要の静的サイトです。デプロイ設定は `.github/workflows/pages.yml` にあり、`main` へのpushまたは手動実行で構文検証・アップロード・公開を行います。
+
+### 初回設定と `Configure Pages` の404からの復旧
+
+1. リポジトリ管理者が `Settings → Pages → Build and deployment → Source` で **GitHub Actions** を選択し、Pagesを有効化します。
+2. Actionsの `Deploy prototype to GitHub Pages` から `Run workflow` を実行します。既存の失敗実行では `Re-run failed jobs` でも再実行できます。
+3. `Configure Pages`・`Upload site artifact`・`Deploy` が成功し、公開URLが表示されることを確認します。
+
+`Get Pages site failed ... Not Found` はPagesの初期設定を確認してください。`actions/configure-pages` の `enablement: true` を追加するだけでは、標準の `GITHUB_TOKEN` で初回サイト作成はできません。[公式Actionの権限要件](https://github.com/actions/configure-pages/blob/v5/action.yml)に従い、初期設定は管理画面または既存の適切な管理権限で行います。新しいトークンやシークレットをコードに保存する必要はありません。
 
 ## できること
 
@@ -20,7 +30,7 @@
 ## 技術構成
 
 - HTML / CSS / JavaScript (静的サイト)
-- Mozilla PDF.js (CDN、PDF読み込み)
+- Mozilla PDF.js (CDN、PDF読み込み。日本語CIDフォント用CMap・標準フォントも同じバージョンのCDNから取得)
 - Tesseract.js (CDN、OCRはユーザー操作時だけ実行)
 - サーバー、DB、OpenAI API、APIキーは不要
 - GitHub Pages と GitHub Actions
