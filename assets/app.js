@@ -1,5 +1,6 @@
 // DoorBoard Studio prototype — all uploaded files are processed in this browser.
 // No customer PDFs, drawings or product images are committed to the public repository.
+const PDFJS_BASE_URL = "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38";
 const DEMO_ITEMS = [
   {id:"WD-1",room:"玄関",type:"片引戸",sku:"DEMO-H001",size:"W1600 × H2400",color:"ホワイト"},
   {id:"WD-2",room:"洋室①",type:"片開戸",sku:"DEMO-D002",size:"W803 × H2400",color:"ホワイト"},
@@ -80,15 +81,21 @@ function setTab(name){
 }
 async function pdfjs(){
  if(!state.pdfjs){
-  state.pdfjs=import("https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.min.mjs").then(m=>{
-    m.GlobalWorkerOptions.workerSrc="https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.worker.min.mjs";return m;
+  state.pdfjs=import(`${PDFJS_BASE_URL}/build/pdf.min.mjs`).then(m=>{
+    m.GlobalWorkerOptions.workerSrc=`${PDFJS_BASE_URL}/build/pdf.worker.min.mjs`;return m;
   }).catch(e=>{state.pdfjs=null;throw e;});
  }
  return state.pdfjs;
 }
 async function openPdf(file){
  const lib=await pdfjs(), data=new Uint8Array(await file.arrayBuffer());
- return lib.getDocument({data}).promise;
+ // Non-embedded Japanese CID fonts need the matching PDF.js character maps.
+ return lib.getDocument({
+  data,
+  cMapUrl:`${PDFJS_BASE_URL}/cmaps/`,
+  cMapPacked:true,
+  standardFontDataUrl:`${PDFJS_BASE_URL}/standard_fonts/`
+ }).promise;
 }
 function groupLines(contents){
  const groups=[];
