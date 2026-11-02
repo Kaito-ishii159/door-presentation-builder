@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#192d2c" />
+  <meta name="description" content="建具見積書と間取り図からお施主様向けプレゼンボードを作成する試作ツール" />
+  <title>DoorBoard Studio | 建具プレゼンボード作成</title>
+  <link rel="stylesheet" href="./assets/styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js" defer></script>
+  <script type="module" src="./assets/app.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><div class="brand-mark">D<span>□</span></div><div><strong>DoorBoard</strong><small>Presentation Studio</small></div></div>
+    <div class="top-actions"><span class="privacy-pill">● ブラウザ内で処理</span><span class="prototype-pill">PROTOTYPE v0.1</span></div>
+  </header>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="side-intro"><span class="overline">WORKSPACE</span><h1>プレゼンボード<br>作成ツール</h1><p>見積書と間取り図から、伝わりやすい住宅建具資料を作成。</p></div>
+      <div class="side-step"><span class="step-index">01</span><div><b>資料を取り込む</b><small>見積書・間取り図</small></div></div>
+      <div class="upload-control">
+        <label for="estimate-file" class="upload-zone"><span class="upload-icon">↥</span><strong>見積書PDF</strong><small id="estimate-name">ファイルを選択</small></label>
+        <input id="estimate-file" type="file" accept=".pdf,application/pdf" hidden />
+        <button id="ocr-btn" class="text-button" type="button" disabled>画像PDFをOCRで読み取る</button>
+        <label for="plan-file" class="upload-zone"><span class="upload-icon">⌗</span><strong>間取り図PDF・画像</strong><small id="plan-name">ファイルを選択</small></label>
+        <input id="plan-file" type="file" accept=".pdf,application/pdf,image/*" hidden />
+      </div>
+      <div class="side-step"><span class="step-index">02</span><div><b>建具情報を確認</b><small>型番・仕様・画像</small></div></div>
+      <div class="side-step"><span class="step-index">03</span><div><b>番号を配置</b><small>図面をクリック・ドラッグ</small></div></div>
+      <div class="side-step"><span class="step-index">04</span><div><b>PDFに出力</b><small>お施主様向け資料</small></div></div>
+      <div class="sidebar-bottom"><button type="button" class="ghost-button full" id="reset-btn">↺ デモデータに戻す</button><p>※ 試作品です。OCR結果・図面への仮配置は必ず確認してください。</p></div>
+    </aside>
+    <main class="main-content">
+      <section class="heading">
+        <div><span class="overline">PRESENTATION WORKSPACE</span><h2>住まいの建具を、<br class="mobile-only">もっとわかりやすく。</h2><p>見積内容を確認しながら、商品一覧と間取り図を一つの資料にまとめます。</p></div>
+        <button id="export-btn" class="primary-button" type="button">⤓ PDFに保存</button>
+      </section>
+      <section class="metrics" aria-label="作業状況">
+        <div class="metric"><span>建具アイテム</span><strong id="total-count">—</strong><small>件</small></div>
+        <div class="metric"><span>図面に配置済み</span><strong id="placed-count">—</strong><small>件</small></div>
+        <div class="metric"><span>商品画像登録</span><strong id="image-count">—</strong><small>件</small></div>
+        <div class="metric metric-status"><span>データ保存先</span><strong>この端末</strong><small>サーバー送信なし</small></div>
+      </section>
+      <section class="workspace">
+        <div class="editor">
+          <div class="panel-title"><div><span class="overline">EDIT DETAILS</span><h3>建具リスト</h3></div><button id="add-btn" class="outline-button" type="button">＋ 追加</button></div>
+          <p class="section-caption">自動抽出した情報は必ず確認し、必要に応じて修正してください。</p>
+          <div id="item-list" class="item-list"></div>
+          <div class="editor-footer"><button type="button" id="save-json-btn" class="ghost-button full">↓ 編集データをJSON保存</button><label class="ghost-button full import-label" for="json-file">↑ 編集データを読み込む</label><input type="file" accept=".json,application/json" id="json-file" hidden /></div>
+        </div>
+        <div class="preview-panel">
+          <div class="panel-title preview-title"><div><span class="overline">LIVE PREVIEW</span><h3>プレビュー</h3></div><span class="preview-label">A4横想定</span></div>
+          <div class="tab-bar" role="tablist" aria-label="表示切り替え">
+            <button type="button" class="tab active" data-tab="catalog" role="tab" aria-selected="true">商品一覧</button>
+            <button type="button" class="tab" data-tab="plan" role="tab" aria-selected="false">間取り図・番号配置</button>
+          </div>
+          <div id="catalog-view">
+            <div class="paper catalog-paper"><div class="paper-heading"><div><small>INTERIOR DOOR SELECTION</small><h4>室内建具 ご提案資料</h4></div><div class="paper-chip">PRESENTATION BOARD</div></div><div class="paper-rule"></div><div class="paper-description">建具の種類・設置場所・品番をご確認ください。</div><div id="catalog-grid" class="catalog-grid"></div><div class="paper-footnote">※ 画像は参考イメージです。実際の商品仕様・色味はメーカーの資料と照合してください。</div></div>
+          </div>
+          <div id="plan-view" hidden>
+            <div class="plan-toolbar"><p id="plan-help">建具を選択し、図面上をクリックして配置します。番号をドラッグして移動できます。</p><button id="suggest-btn" class="outline-button" type="button">部屋名から仮配置</button></div>
+            <div class="select-strip"><label for="selected-door">配置する建具</label><select id="selected-door"></select><button type="button" id="clear-selected-btn" class="ghost-button">選択番号を解除</button></div>
+            <div class="plan-canvas-wrap"><div id="plan-stage" class="plan-stage"><img id="plan-image" src="./assets/sample-floorplan.svg" alt="間取り図（架空のサンプル）"/><div id="pin-layer" class="pin-layer"></div></div></div>
+            <div class="plan-note">※ 仮配置は部屋名の文字位置を使う参考候補です。建具開口部の正確な自動判定ではありません。</div>
+            <div id="placement-list" class="placement-list"></div>
+          </div>
+          <div class="preview-footer"><span id="status-msg" role="status" aria-live="polite">デモデータを表示しています。</span><span>PDFはブラウザの印刷機能から保存</span></div>
+        </div>
+      </section>
+      <footer class="app-footer">DoorBoard Studio · Prototype · 実際の業務導入前にOCRと位置配置の検収が必要です。</footer>
+    </main>
+  </div>
+  <div id="print-root" aria-hidden="true"></div>
+</body>
+</html>
