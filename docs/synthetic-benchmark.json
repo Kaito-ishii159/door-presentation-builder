@@ -1,0 +1,198 @@
+{
+  "name": "架空の4ページ・3建具のブラウザ測定",
+  "synthetic": true,
+  "measuredDate": "2026-11-03",
+  "environment": "macOS / Chrome",
+  "limitations": "実メーカーの帳票精度は未測定。3建具のみ。グレースケール、目標240dpi、信頼度下限60、200dpiの架空ラスター画像から作成。",
+  "runs": {
+    "pdfText": {
+      "source": {
+        "fileName": "fictional-estimate-text.pdf",
+        "method": "text",
+        "pageCount": 4,
+        "processedPages": 4,
+        "partial": false,
+        "durationMs": 355,
+        "pdfjsVersion": "4.10.38",
+        "ocrVersion": null
+      },
+      "layout": {
+        "version": 1,
+        "name": "架空サンプル用（実帳票では調整が必要）",
+        "boundaries": [
+          0.05,
+          0.17,
+          0.35,
+          0.6,
+          0.78,
+          0.95
+        ],
+        "top": 0.2,
+        "bottom": 0.88,
+        "rowTolerance": 0.008,
+        "rowHeight": 0,
+        "minConfidence": 60,
+        "dpi": 240,
+        "binarize": false,
+        "threshold": 190,
+        "carryAcrossPages": true
+      },
+      "metrics": {
+        "id": {
+          "correct": 3,
+          "total": 3,
+          "rate": 1
+        },
+        "room": {
+          "correct": 3,
+          "total": 3,
+          "rate": 1
+        },
+        "sku": {
+          "correct": 2,
+          "total": 3,
+          "rate": 0.6666666666666666
+        },
+        "type": {
+          "correct": 3,
+          "total": 3,
+          "rate": 1
+        },
+        "size": {
+          "correct": 3,
+          "total": 3,
+          "rate": 1
+        }
+      },
+      "mismatches": [
+        {
+          "record": 3,
+          "field": "sku",
+          "label": "商品型番",
+          "expected": "DEMO-F003",
+          "actual": "要確認",
+          "reason": "完全一致しません"
+        }
+      ]
+    },
+    "columnOcr": {
+      "source": {
+        "durationMs": 8008,
+        "fileName": "fictional-estimate-scan.pdf",
+        "method": "ocr",
+        "ocrVersion": "5.1.1",
+        "pageCount": 4,
+        "partial": false,
+        "pdfjsVersion": "4.10.38",
+        "processedPages": 4
+      },
+      "layout": {
+        "binarize": false,
+        "bottom": 0.88,
+        "boundaries": [
+          0.05,
+          0.17,
+          0.35,
+          0.6,
+          0.78,
+          0.95
+        ],
+        "carryAcrossPages": true,
+        "dpi": 240,
+        "minConfidence": 60,
+        "name": "架空サンプル用（実帳票では調整が必要）",
+        "rowHeight": 0,
+        "rowTolerance": 0.008,
+        "threshold": 190,
+        "top": 0.2,
+        "version": 1
+      },
+      "metrics": {
+        "id": {
+          "correct": 3,
+          "rate": 1,
+          "total": 3
+        },
+        "room": {
+          "correct": 2,
+          "rate": 0.6666666666666666,
+          "total": 3
+        },
+        "size": {
+          "correct": 3,
+          "rate": 1,
+          "total": 3
+        },
+        "sku": {
+          "correct": 2,
+          "rate": 0.6666666666666666,
+          "total": 3
+        },
+        "type": {
+          "correct": 3,
+          "rate": 1,
+          "total": 3
+        }
+      },
+      "mismatches": [
+        {
+          "actual": "要確認",
+          "expected": "洋室①",
+          "field": "room",
+          "label": "設置場所",
+          "reason": "完全一致しません",
+          "record": 2
+        },
+        {
+          "actual": "要確認",
+          "expected": "DEMO-F003",
+          "field": "sku",
+          "label": "商品型番",
+          "reason": "完全一致しません",
+          "record": 3
+        }
+      ]
+    }
+  },
+  "ocrReviewEvidence": {
+    "room": {
+      "candidates": [
+        "洋室〇"
+      ],
+      "confidence": 52.71549606323242,
+      "reason": "OCR信頼度が設定値未満です",
+      "sources": [
+        {
+          "confidence": 52.71549606323242,
+          "page": 1,
+          "raw": "洋室 〇",
+          "y": 0.8018154311649016
+        }
+      ],
+      "value": "要確認"
+    },
+    "sku": {
+      "candidates": [
+        "DEMO-F003",
+        "DEMO-PART030"
+      ],
+      "confidence": 88.60401916503906,
+      "reason": "複数の候補があり、選択が必要です",
+      "sources": [
+        {
+          "confidence": 88.60401916503906,
+          "page": 3,
+          "raw": "DEMO-F003",
+          "y": 0.28189611699445283
+        },
+        {
+          "confidence": 90.62033081054688,
+          "page": 4,
+          "raw": "DEMO-PART030",
+          "y": 0.2723146747352496
+        }
+      ],
+      "value": "要確認"
+    }
+  }
+}

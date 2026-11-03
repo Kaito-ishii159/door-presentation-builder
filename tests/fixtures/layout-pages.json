@@ -1,0 +1,302 @@
+[
+  {
+    "number": 1,
+    "tokens": [
+      {
+        "text": "建具番号",
+        "x": 0.1,
+        "y": 0.21,
+        "confidence": null,
+        "source": "fictional-coordinate-fixture"
+      },
+      {
+        "text": "設置場所",
+        "x": 0.23,
+        "y": 0.21,
+        "confidence": null,
+        "source": "fictional-coordinate-fixture"
+      },
+      {
+        "text": "商品型番",
+        "x": 0.45,
+        "y": 0.21,
+        "confidence": null,
+        "source": "fictional-coordinate-fixture"
+      },
+      {
+        "text": "建具種類",
+        "x": 0.66,
+        "y": 0.21,
+        "confidence": null,
+        "source": "fictional-coordinate-fixture"
+      },
+      {
+        "text": "寸法",
+        "x": 0.84,
+        "y": 0.21,
+        "confidence": null,
+        "source": "fictional-coordinate-fixture"
+      },
+      {
+        "text": "WD-1",
+        "x": 0.1,
+        "y": 0.28,
+        "confidence": null,
+        "source": "fictional-coordinate-fixture"
+      },
+      {
+        "text": "玄関",
+        "x": 0.23,
+        "y": 0.28,
+        "confidence": null,
+        "source": "fictional-coordinate-fixture"
+      },
+      {
+        "text": "DEMO-H001",
+        "x": 0.45,
+        "y": 0.28,
+        "confidence": null,
+        "source": "fictional-coordinate-fixture"
+      },
+      {
+        "text": "片引戸",
+        "x": 0.66,
+        "y": 0.34,
+        "confidence": null,
+        "source": "fictional-coordinate-fixture"
+      },
+      {
+        "text": "W1600",
+        "x": 0.84,
+        "y": 0.34,
+        "confidence": null,
+        "source": "fictional-coordinate-fixture"
+      },
+      {
+        "text": "H2400",
+        "x": 0.84,
+        "y": 0.4,
+        "confidence": null,
+        "source": "fictional-coordinate-fixture"
+      },
+      {
+        "text": "WD-2",
+        "x": 0.1,
+        "y": 0.8,
+        "confidence": null,
+        "source": "fictional-coordinate-fixture"
+      },
+      {
+        "text": "洋室①",
+        "x": 0.23,
+        "y": 0.8,
+        "confidence": null,
+        "source": "fictional-coordinate-fixture"
+      }
+    ]
+  },
+  {
+    "number": 2,
+    "tokens": [
+      {
+        "text": "建具番号",
+        "x": 0.1,
+        "y": 0.21,
+        "confidence": null,
+        "source": "fictional-coordinate-fixture"
+      },
+      {
+        "text": "設置場所",
+        "x": 0.23,
+        "y": 0.21,
+        "confidence": null,
+        "source": "fictional-coordinate-fixture"
+      },
+      {
+        "text": "商品型番",
+        "x": 0.45,
+        "y": 0.21,
+        "confidence": null,
+        "source": "fictional-coordinate-fixture"
+      },
+      {
+        "text": "建具種類",
+        "x": 0.66,
+        "y": 0.21,
+        "confidence": null,
+        "source": "fictional-coordinate-fixture"
+      },
+      {
+        "text": "寸法",
+        "x": 0.84,
+        "y": 0.21,
+        "confidence": null,
+        "source": "fictional-coordinate-fixture"
+      },
+      {
+        "text": "DEMO-D002",
+        "x": 0.45,
+        "y": 0.27,
+        "confidence": null,
+        "source": "fictional-coordinate-fixture"
+      },
+      {
+        "text": "片開戸",
+        "x": 0.66,
+        "y": 0.27,
+        "confidence": null,
+        "source": "fictional-coordinate-fixture"
+      },
+      {
+        "text": "W800",
+        "x": 0.84,
+        "y": 0.27,
+        "confidence": null,
+        "source": "fictional-coordinate-fixture"
+      },
+      {
+        "text": "H2400",
+        "x": 0.84,
+        "y": 0.33,
+        "confidence": null,
+        "source": "fictional-coordinate-fixture"
+      },
+      {
+        "text": "WD-2",
+        "x": 0.1,
+        "y": 0.4,
+        "confidence": null,
+        "source": "fictional-coordinate-fixture"
+      },
+      {
+        "text": "DEMO-D002",
+        "x": 0.45,
+        "y": 0.4,
+        "confidence": null,
+        "source": "fictional-coordinate-fixture"
+      }
+    ]
+  },
+  {
+    "number": 3,
+    "tokens": [
+      {
+        "text": "建具番号",
+        "x": 0.1,
+        "y": 0.21,
+        "confidence": null,
+        "source": "fictional-coordinate-fixture"
+      },
+      {
+        "text": "設置場所",
+        "x": 0.23,
+        "y": 0.21,
+        "confidence": null,
+        "source": "fictional-coordinate-fixture"
+      },
+      {
+        "text": "商品型番",
+        "x": 0.45,
+        "y": 0.21,
+        "confidence": null,
+        "source": "fictional-coordinate-fixture"
+      },
+      {
+        "text": "建具種類",
+        "x": 0.66,
+        "y": 0.21,
+        "confidence": null,
+        "source": "fictional-coordinate-fixture"
+      },
+      {
+        "text": "寸法",
+        "x": 0.84,
+        "y": 0.21,
+        "confidence": null,
+        "source": "fictional-coordinate-fixture"
+      },
+      {
+        "text": "WD-3",
+        "x": 0.1,
+        "y": 0.28,
+        "confidence": null,
+        "source": "fictional-coordinate-fixture"
+      },
+      {
+        "text": "収納",
+        "x": 0.23,
+        "y": 0.28,
+        "confidence": null,
+        "source": "fictional-coordinate-fixture"
+      },
+      {
+        "text": "DEMO-F003",
+        "x": 0.45,
+        "y": 0.28,
+        "confidence": null,
+        "source": "fictional-coordinate-fixture"
+      },
+      {
+        "text": "収納折戸",
+        "x": 0.66,
+        "y": 0.28,
+        "confidence": null,
+        "source": "fictional-coordinate-fixture"
+      },
+      {
+        "text": "W1715 H2400",
+        "x": 0.84,
+        "y": 0.28,
+        "confidence": null,
+        "source": "fictional-coordinate-fixture"
+      }
+    ]
+  },
+  {
+    "number": 4,
+    "tokens": [
+      {
+        "text": "建具番号",
+        "x": 0.1,
+        "y": 0.21,
+        "confidence": null,
+        "source": "fictional-coordinate-fixture"
+      },
+      {
+        "text": "設置場所",
+        "x": 0.23,
+        "y": 0.21,
+        "confidence": null,
+        "source": "fictional-coordinate-fixture"
+      },
+      {
+        "text": "商品型番",
+        "x": 0.45,
+        "y": 0.21,
+        "confidence": null,
+        "source": "fictional-coordinate-fixture"
+      },
+      {
+        "text": "建具種類",
+        "x": 0.66,
+        "y": 0.21,
+        "confidence": null,
+        "source": "fictional-coordinate-fixture"
+      },
+      {
+        "text": "寸法",
+        "x": 0.84,
+        "y": 0.21,
+        "confidence": null,
+        "source": "fictional-coordinate-fixture"
+      },
+      {
+        "text": "DEMO-PART030",
+        "x": 0.45,
+        "y": 0.27,
+        "confidence": null,
+        "source": "fictional-coordinate-fixture"
+      }
+    ]
+  }
+]

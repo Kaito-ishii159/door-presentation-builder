@@ -7,7 +7,7 @@
   <meta name="description" content="建具見積書と間取り図からお施主様向けプレゼンボードを作成する試作ツール" />
   <title>DoorBoard Studio | 建具プレゼンボード作成</title>
   <link rel="stylesheet" href="./assets/styles.css" />
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js" defer></script>
   <script type="module" src="./assets/app.js"></script>
 </head>
 <body>
@@ -42,6 +42,57 @@
         <div class="metric"><span>商品画像登録</span><strong id="image-count">—</strong><small>件</small></div>
         <div class="metric metric-status"><span>データ保存先</span><strong>この端末</strong><small>サーバー送信なし</small></div>
       </section>
+      <details class="estimate-lab" id="estimate-lab" open>
+        <summary><span>見積書の読取・精度検証</span><small id="lab-summary">実帳票の精度は未測定</small></summary>
+        <p class="lab-intro">最初に帳票の列と表の範囲を合わせてください。初期設定は架空サンプル用です。PDF・正解データはこのブラウザ内で処理します。</p>
+        <div class="lab-grid">
+          <section class="lab-settings" aria-label="帳票レイアウト設定">
+            <h3>1. 固定レイアウトを設定</h3>
+            <label>設定名<input id="layout-name" maxlength="120" /></label>
+            <div class="layout-boundaries" id="layout-boundaries"></div>
+            <div class="lab-controls" id="layout-order"></div>
+            <div class="lab-controls">
+              <label>表の上端 %<input id="layout-top" type="number" min="0" max="98" step="0.1" value="20" /></label>
+              <label>表の下端 %<input id="layout-bottom" type="number" min="2" max="100" step="0.1" value="88" /></label>
+              <label>行の高さ %（0=文字座標で集約）<input id="layout-row-height" type="number" min="0" max="20" step="0.1" value="0" /></label>
+              <label>行の位置許容差 %<input id="layout-tolerance" type="number" min="0.1" max="3" step="0.1" value="0.8" /></label>
+              <label>OCR信頼度の下限（精度ではありません）<input id="layout-confidence" type="number" min="0" max="100" value="60" /></label>
+              <label>画像化の目標DPI<input id="layout-dpi" type="number" min="120" max="360" step="30" value="240" /></label>
+              <label>処理ページ上限（0=全ページ、最大200）<input id="read-max-pages" type="number" min="0" max="200" value="0" /></label>
+              <label>二値化しきい値<input id="layout-threshold" type="number" min="1" max="254" value="190" /></label>
+            </div>
+            <label class="check-label"><input id="layout-binarize" type="checkbox" /> OCR画像を二値化（通常はグレー化のみ）</label>
+            <label class="check-label"><input id="layout-carry" type="checkbox" checked /> 次ページ先頭の番号なし明細を直前のWDへ継続</label>
+            <p class="lab-note">継続の判断は固定帳票の前提です。明細原文とページ番号で確認してください。複数の型番・寸法などが競合した場合は「要確認」にします。</p>
+            <div class="lab-actions"><button id="layout-save" class="ghost-button" type="button">レイアウトJSON保存</button><label class="ghost-button import-label" for="layout-file">レイアウト読込</label><input id="layout-file" type="file" accept=".json,application/json" hidden /></div>
+            <div class="lab-actions"><button id="read-text-btn" class="outline-button" type="button" disabled>列位置でPDFテキストを再読取</button><button id="read-cancel-btn" class="ghost-button" type="button" disabled>読取を中止</button></div>
+            <p id="lab-progress" role="status" aria-live="polite">見積書PDFを選択してください。スキャンPDFは左のOCRボタンから実行します。</p>
+          </section>
+          <section class="lab-preview" aria-label="列範囲のプレビュー">
+            <h3>2. 原本と列範囲を確認</h3>
+            <div class="lab-actions"><label>表示ページ<input id="estimate-preview-page" type="number" min="1" value="1" /></label><button id="estimate-preview-btn" class="ghost-button" type="button" disabled>ページを表示</button></div>
+            <div id="estimate-preview-empty" class="empty-state">PDF読込後、ここに表と列境界を表示します。</div>
+            <div id="estimate-preview-wrap" class="estimate-preview-wrap" hidden><img id="estimate-preview-image" alt="ブラウザ内で画像化した見積書" /><div id="estimate-columns" class="estimate-columns"></div></div>
+            <p id="layout-state" class="lab-note">列順：建具番号 → 設置場所 → 商品型番 → 建具種類 → 寸法</p>
+          </section>
+        </div>
+        <section class="lab-results" aria-label="読取結果の確認と修正">
+          <h3>3. 抽出候補を確認・修正</h3>
+          <p id="reading-summary">読取結果はまだありません。</p>
+          <div id="reading-warnings" class="lab-warning" hidden></div>
+          <div id="reading-review" class="review-table-wrap"></div>
+          <div id="reading-evidence"></div>
+          <details><summary>抽出時点・手修正後のJSON</summary><textarea id="reading-json" readonly aria-label="読取結果JSON" rows="8"></textarea><button id="reading-export" class="ghost-button" type="button" disabled>読取結果JSONを保存</button></details>
+        </section>
+        <section class="lab-accuracy" aria-label="項目別の完全一致率">
+          <h3>4. 正解データと比較</h3>
+          <p class="lab-note">正解JSONのitemsを原本のWD出現順に並べます。同じ出現順で対応付け、文字列を正規化せず比較します。追加・欠落も不一致として分母に含めます。抽出時点と手修正後の結果を別々に表示します。</p>
+          <div class="lab-actions"><label class="outline-button import-label" for="truth-file">正解JSONを選択</label><input id="truth-file" type="file" accept=".json,application/json" hidden /><button id="truth-template" class="ghost-button" type="button">正解JSONひな形</button><button id="fixture-btn" class="ghost-button" type="button">架空座標サンプルを試す（OCRではありません）</button><button id="truth-clear" class="ghost-button" type="button" disabled>正解を解除</button></div>
+          <p id="accuracy-summary" role="status">実帳票の正解データがないため、精度は未測定です。</p>
+          <div id="accuracy-metrics" class="review-table-wrap"></div><div id="accuracy-mismatches"></div>
+          <button id="accuracy-export" class="ghost-button" type="button" disabled>項目別精度・不一致一覧をJSON保存</button>
+        </section>
+      </details>
       <section class="workspace">
         <div class="editor">
           <div class="panel-title"><div><span class="overline">EDIT DETAILS</span><h3>建具リスト</h3></div><button id="add-btn" class="outline-button" type="button">＋ 追加</button></div>

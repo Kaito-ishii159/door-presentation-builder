@@ -1,0 +1,5 @@
+.DS_Store
+/private-fixtures/
+/tmp/
+/output/
+**/__pycache__/
