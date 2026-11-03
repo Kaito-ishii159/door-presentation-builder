@@ -1,3 +1,6 @@
+import {initEstimateLab} from "./estimate-lab.mjs";
+import {REVIEW} from "./estimate-core.mjs";
+let lab;
 // DoorBoard Studio prototype — all uploaded files are processed in this browser.
 // No customer PDFs, drawings or product images are committed to the public repository.
 const PDFJS_BASE_URL = "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38";
@@ -55,7 +58,7 @@ function renderItems(){
       </div>
       <div class="item-image-row">
         <label class="image-label">📷 ${item.image?"商品画像を変更":"商品画像を登録"}<input type="file" accept="image/*" data-image="${i}" aria-label="商品画像"/></label>
-        <button type="button" class="card-mini-action" data-select="${i}">図面で選択 ↗</button>
+        <button type="button" class="card-mini-action" data-select="${i}" ${isPlaceable(item)?"":"disabled"}>図面で選択 ↗</button>
       </div>
     </article>`).join("");
 }
@@ -63,16 +66,18 @@ function catalogTiles(){
  return state.items.map(item=>`<article class="product-tile"><img class="product-image" src="${esc(itemImage(item))}" alt="建具の参考画像"/><div class="product-info"><span class="product-num">${esc(item.id)}</span><h5>${esc(item.room||"設置場所未設定")}</h5><p>${esc(item.type||"種類未設定")}</p><p>品番：${esc(item.sku||"未設定")}</p><p>寸法：${esc(item.size||"未設定")}</p><p>色：${esc(item.color||"未設定")}</p></div></article>`).join("");
 }
 function renderCatalog(){$("catalog-grid").innerHTML=catalogTiles()||'<p class="notice">建具を追加してください。</p>';}
+function isPlaceable(item){return !!item.id&&item.id!==REVIEW&&state.items.filter(x=>x.id===item.id).length===1;}
 function renderSelector(){
- if(!state.items.some(x=>x.id===state.selected)) state.selected=state.items[0]?.id||"";
- $("selected-door").innerHTML=state.items.map(x=>`<option value="${esc(x.id)}" ${x.id===state.selected?"selected":""}>${esc(x.id)} ／ ${esc(x.room)}</option>`).join("");
+ const available=state.items.filter(isPlaceable);
+ if(!available.some(x=>x.id===state.selected)) state.selected=available[0]?.id||"";
+ $("selected-door").innerHTML=available.map(x=>`<option value="${esc(x.id)}" ${x.id===state.selected?"selected":""}>${esc(x.id)} ／ ${esc(x.room)}</option>`).join("");
 }
 function renderPins(){
- $("pin-layer").innerHTML=Object.entries(state.pins).filter(([id])=>state.items.some(x=>x.id===id)).map(([id,p])=>`<button type="button" class="pin ${id===state.selected?"selected":""}" data-pin="${esc(id)}" style="left:${clamp(Number(p.x)||0,0,1)*100}%;top:${clamp(Number(p.y)||0,0,1)*100}%" title="${esc(id)}：ドラッグして移動">${esc(id)}</button>`).join("");
+ $("pin-layer").innerHTML=Object.entries(state.pins).filter(([id])=>state.items.some(x=>x.id===id&&isPlaceable(x))).map(([id,p])=>`<button type="button" class="pin ${id===state.selected?"selected":""}" data-pin="${esc(id)}" style="left:${clamp(Number(p.x)||0,0,1)*100}%;top:${clamp(Number(p.y)||0,0,1)*100}%" title="${esc(id)}：ドラッグして移動">${esc(id)}</button>`).join("");
  $("placement-list").innerHTML=state.items.map(x=>`<button type="button" class="placement-chip ${state.pins[x.id]?"active":"missing"}" data-choose="${esc(x.id)}">${esc(x.id)} ${state.pins[x.id]?"✓ 配置済み":"＋ 未配置"}</button>`).join("");
  updateMetrics();
 }
-function renderAll(){renderItems();renderCatalog();renderSelector();renderPins();updateMetrics();}
+function renderAll(){renderItems();renderCatalog();renderSelector();renderPins();updateMetrics();lab?.refresh();}
 function setTab(name){
  state.tab=name;
  $("catalog-view").hidden=name!=="catalog";
@@ -97,73 +102,7 @@ async function openPdf(file){
   standardFontDataUrl:`${PDFJS_BASE_URL}/standard_fonts/`
  }).promise;
 }
-function groupLines(contents){
- const groups=[];
- for(const item of contents.items||[]){
-  if(!item.str?.trim())continue;
-  const y=item.transform[5],x=item.transform[4];
-  let group=groups.find(g=>Math.abs(g.y-y)<3.8);
-  if(!group){group={y,parts:[]};groups.push(group);}
-  group.parts.push({x,str:item.str.trim()});
- }
- return groups.sort((a,b)=>b.y-a.y).map(g=>g.parts.sort((a,b)=>a.x-b.x).map(x=>x.str).join(" "));
-}
-function detectRoom(text){
- const t=String(text).replace(/\s/g,"");
- return t.match(/洋室[①②③④⑤0-9]?|トイレ[①②0-9]?|洗面所|玄関|パントリー|クローゼット|LDK|ＬＤＫ|ホール|WIC|ＷＩＣ|収納|SC|脱衣所/)?.[0]||"要確認";
-}
-function detectType(text){return text.match(/片引[き]?戸|上吊り引戸|両開き収納|４枚折戸|4枚折戸|折戸|片開[き]?戸|引戸|ドア|収納/)?.[0]||"要確認";}
-function extractItems(text){
- const re=/\bWD[\s\-－]*(\d{1,3})\b/gi, found=[...text.matchAll(re)];
- const unique=new Map();
- for(let i=0;i<found.length;i++){
-  const m=found[i],id="WD-"+Number(m[1]),segment=text.slice(m.index,Math.min(m.index+340,found[i+1]?.index??text.length));
-  if(unique.has(id))continue;
-  const sku=segment.match(/\b(?:AN[A-Z0-9-]{5,}|[A-Z]{2,5}[A-Z0-9-]{5,})\b/i)?.[0]||"";
-  let size="";
-  const wh=segment.match(/W\s*=?\s*(\d{3,4})[^\n]{0,35}?H\s*=?\s*(\d{3,4})/i);
-  const dim=segment.match(/\b(\d{3,4})\s*[×xX＊*]\s*(\d{3,4})\b/);
-  if(wh)size="W"+wh[1]+" × H"+wh[2];else if(dim)size="W"+dim[1]+" × H"+dim[2];
-  unique.set(id,{id,room:detectRoom(segment),type:detectType(segment),sku,size,color:"要確認",image:null});
- }
- return [...unique.values()].slice(0,100);
-}
-async function readEstimate(file,{ocr=false}={}){
- const btn=$("ocr-btn");
- try{
-  status(ocr?"OCRを準備しています…":"見積書の文字情報を抽出しています…");
-  const pdf=await openPdf(file);let chunks=[];const maxPages=Math.min(pdf.numPages,ocr?3:20);
-  let worker=null;
-  if(ocr){
-   if(!window.Tesseract)throw new Error("OCRライブラリを読み込めませんでした。ネット接続をご確認ください。");
-   worker=await window.Tesseract.createWorker("jpn+eng",1,{logger:m=>{if(m.status==="recognizing text")status("OCR解析中… "+Math.round((m.progress||0)*100)+"%");}});
-  }
-  try{
-   for(let n=1;n<=maxPages;n++){
-    const page=await pdf.getPage(n);
-    if(ocr){
-     const raw=page.getViewport({scale:1}),scale=Math.min(2.1,2500/raw.width);
-     const viewport=page.getViewport({scale}),canvas=document.createElement("canvas");
-     canvas.width=Math.round(viewport.width);canvas.height=Math.round(viewport.height);
-     await page.render({canvasContext:canvas.getContext("2d"),viewport}).promise;
-     const result=await worker.recognize(canvas);
-     chunks.push(result.data.text||"");
-    }else{
-     const content=await page.getTextContent();
-     chunks.push(groupLines(content).join("\n"));
-    }
-   }
-  }finally{if(worker)await worker.terminate();await pdf.destroy();}
-  const parsed=extractItems(chunks.join("\n"));
-  if(parsed.length){
-   state.items=parsed;state.pins={};state.selected=parsed[0].id;renderAll();
-   status(parsed.length+"件の候補を抽出しました。全項目の確認・修正をお願いします。");
-  }else{
-   status(ocr?"建具番号を検出できませんでした。手動で追加・修正してください。":"文字情報から建具番号を検出できませんでした。画像PDFならOCRをお試しください。");
-  }
-  btn.disabled=false;
- }catch(e){console.error(e);status("PDF読み取りに失敗しました："+e.message);btn.disabled=false;}
-}
+async function readEstimate(file,{ocr=false}={}){return lab.run(ocr?"ocr":"text");}
 async function readFloorPlan(file){
  try{
   status("間取り図を読み込んでいます…");
@@ -233,16 +172,20 @@ $("plan-stage").addEventListener("click",e=>{
  state.pins[state.selected]={...planCoordinate(e),source:"manual"};renderPins();
  status(state.selected+"を配置しました。ドラッグで微調整できます。");
 });
-$("item-list").addEventListener("input",e=>{
- const el=e.target,idx=Number(el.dataset.index),field=el.dataset.field;
- if(!field||!Number.isInteger(idx)||!state.items[idx])return;
+function editItem(idx,field,value){
+ if(!Number.isInteger(idx)||!state.items[idx])return;
  const item=state.items[idx],oldId=item.id;
- item[field]=field==="id"?cleanId(el.value):el.value;
+ item[field]=field==="id"?cleanId(value):value;
+ item.manualFields={...item.manualFields,[field]:true};
  if(field==="id"&&item.id!==oldId){
   if(state.pins[oldId]){state.pins[item.id]=state.pins[oldId];delete state.pins[oldId];}
   if(state.selected===oldId)state.selected=item.id;
  }
- renderCatalog();renderSelector();renderPins();
+ if(field==="sku")item.skuLookup={raw:item.review?.sku?.sources?.map(s=>s.raw).join("\n")||"",key:item.sku===REVIEW?null:item.sku,matchMode:"exact",status:"master-not-loaded"};
+ renderCatalog();renderSelector();renderPins();lab?.refresh();
+}
+$("item-list").addEventListener("input",e=>{
+ const el=e.target;if(el.dataset.field)editItem(Number(el.dataset.index),el.dataset.field,el.value);
 });
 $("item-list").addEventListener("change",async e=>{
  const el=e.target;
@@ -263,7 +206,7 @@ $("item-list").addEventListener("click",e=>{
  const select=e.target.closest("[data-select]");
  if(select){
   const item=state.items[Number(select.dataset.select)];
-  if(item){state.selected=item.id;setTab("plan");renderSelector();renderPins();status(item.id+"を選択中。図面をクリックして配置してください。");}
+  if(item&&isPlaceable(item)){state.selected=item.id;setTab("plan");renderSelector();renderPins();status(item.id+"を選択中。図面をクリックして配置してください。");}
  }
 });
 $("add-btn").addEventListener("click",()=>{
@@ -280,7 +223,7 @@ $("reset-btn").addEventListener("click",()=>{
  state.estimateFile=null;state.planFile=null;
  $("plan-image").src=state.planUrl;$("plan-name").textContent="ファイルを選択";$("estimate-name").textContent="ファイルを選択";$("ocr-btn").disabled=true;
  $("estimate-file").value="";$("plan-file").value="";
- setTab("catalog");renderAll();status("架空のデモデータに戻しました。");
+ lab.clear();setTab("catalog");renderAll();status("架空のデモデータに戻しました。");
 });
 document.querySelectorAll("[data-tab]").forEach(b=>b.addEventListener("click",()=>setTab(b.dataset.tab)));
 $("selected-door").addEventListener("change",e=>{state.selected=e.target.value;renderPins();});
@@ -329,12 +272,12 @@ $("json-file").addEventListener("change",async e=>{
     state.pins[id]={x:clamp(p.x,0,1),y:clamp(p.y,0,1),source:"manual"};
   }
   if(typeof raw.planUrl==="string"&&raw.planUrl.startsWith("data:image/")){state.planUrl=raw.planUrl;$("plan-image").src=state.planUrl;}
-  state.selected=state.items[0]?.id||"";renderAll();status("編集データを読み込みました。");
+  state.selected=state.items[0]?.id||"";lab.clear();renderAll();status("編集データを読み込みました。");
  }catch(error){status("JSONを読み込めませんでした："+error.message);}
  e.target.value="";
 });
 function printPins(){
- return Object.entries(state.pins).filter(([id])=>state.items.some(x=>x.id===id)).map(([id,p])=>`<span class="pin" style="left:${clamp(Number(p.x)||0,0,1)*100}%;top:${clamp(Number(p.y)||0,0,1)*100}%">${esc(id)}</span>`).join("");
+ return Object.entries(state.pins).filter(([id])=>state.items.some(x=>x.id===id&&isPlaceable(x))).map(([id,p])=>`<span class="pin" style="left:${clamp(Number(p.x)||0,0,1)*100}%;top:${clamp(Number(p.y)||0,0,1)*100}%">${esc(id)}</span>`).join("");
 }
 $("export-btn").addEventListener("click",()=>{
  const paper=document.querySelector("#catalog-view .paper").cloneNode(true);
@@ -346,4 +289,5 @@ $("export-btn").addEventListener("click",()=>{
  status("印刷ダイアログで「PDFとして保存」を選択してください。");
  requestAnimationFrame(()=>setTimeout(()=>window.print(),200));
 });
+lab=initEstimateLab({state,openPdf,renderAll,onEdit:editItem,status});
 renderAll();setTab("catalog");
